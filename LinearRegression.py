@@ -20,3 +20,11 @@ for i in range(len(ax)):
     ax[i].set_xlabel(labels[i])
 ax[0].set_ylabel("petrol used")
 plt.show()
+
+"""
+Thoughts after visualising dataset:
+    There doesn't seem to be any obvious trend in the data (at least linearly)
+    except for in the "proportion of drivers" vs petrol usage graph. I predict
+    that the weight for the proportion of drivers feature will be larger relative
+    to the other features.
+"""
