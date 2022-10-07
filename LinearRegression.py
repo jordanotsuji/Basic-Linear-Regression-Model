@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 data = np.loadtxt("./Data/petrol_usage.txt", skiprows=41) # load data
 data = np.delete(data, 0, 1)    # delete first col (index)
+labels = ['petrol tax', 'per capita income', 'miles of paved driveway', 'proportion of drivers']
 
 # break data into features and outcomes
 X = np.delete(data, 4, 1)
@@ -12,10 +13,10 @@ Y = np.delete(data, np.s_[0:4], 1)
 # to a 1d array with the same # of entries 
 Y = Y.flatten()
 
-print(X[:,1])
-print(Y)
-# plt.scatter(X[:,0], Y, c="blue")
-plt.scatter(X[:,1], Y, c="red")
-plt.ylabel("petrol used")
-plt.xlabel("average income (dollars)")
+fig, ax = plt.subplots(1,4,figsize=(12,5),sharey=True)
+for i in range(len(ax)):
+    # [: x,y] syntax = row , column
+    ax[i].scatter(X[:,i], Y)
+    ax[i].set_xlabel(labels[i])
+ax[0].set_ylabel("petrol used")
 plt.show()
