@@ -28,3 +28,26 @@ Thoughts after visualising dataset:
     that the weight for the proportion of drivers feature will be larger relative
     to the other features.
 """
+
+def predict(X, w, b):
+    """
+    calculate prediction based on weights w, bias b, and features X
+    """
+    return np.dot(X, w) + b
+
+def compute_cost(X, y, w, b):
+    """
+    calculate the cost of a predictive model with weights w and bias b
+    cost function used: (first image) https://math.stackexchange.com/questions/2202545/why-using-squared-distances-in-the-cost-function-linear-regression
+    """
+
+    m = X.shape[0] # get the # of data points
+    totalCost = 0
+
+    for i in range (m):
+        f_wb_i = np.dot(X[i], w) + b
+        totalCost += (f_wb_i - y[i])**2
+    totalCost /= 2*m
+    return totalCost
+
+
