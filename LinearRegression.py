@@ -2,57 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy, math
 
-"""
-Data Parsing/cleaning 
-"""
-data = np.loadtxt("./Data/petrol_usage.txt", skiprows=41) # load data
-data = np.delete(data, 0, 1)    # delete first col (index)
-labels = ['petrol tax', 'per capita income', 'miles of paved driveway', 'proportion of drivers']
-
-# break data into features and outcomes
-X = np.delete(data, 4, 1)
-# np.s_[0:4] means 0 up to 4 cols get deleted, the 1 = col, 0 = row
-Y = np.delete(data, np.s_[0:4], 1)
-# flatten to make it go from a 2d array with a bunch of 1 entry arrays
-# to a 1d array with the same # of entries 
-Y = Y.flatten()
-print(f"X Shape: {X.shape}, X Type:{type(X)})")
-# print(X)
-print(f"y Shape: {Y.shape}, y Type:{type(Y)})")
-# print(Y)
-
-"""
-Data Plotting/Visualization
-"""
-# fig, ax = plt.subplots(1,4,figsize=(12,5),sharey=True)
-# for i in range(len(ax)):
-#     # [: x,y] syntax = row , column
-#     ax[i].scatter(X[:,i], Y, c="blue")
-#     ax[i].set_xlabel(labels[i])
-# ax[0].set_ylabel("petrol used")
-# plt.show()
-
-"""
-test data creation
-"""
-# X_train = np.array([[2104, 5, 1, 45], [1416, 3, 2, 40], [852, 2, 1, 35]])
-# y_train = np.array([460, 232, 178])
-# print(f"X Shape: {X_train.shape}, X Type:{type(X_train)})")
-# print(X_train)
-# print(f"y Shape: {y_train.shape}, y Type:{type(y_train)})")
-# print(y_train)
-# b_init = 785.1811367994083
-# w_init = np.array([ 0.39133535, 18.75376741, -53.36032453, -26.42131618])
-# print(f"w_init shape: {w_init.shape}, b_init type: {type(b_init)}")
-
-
-"""
-Thoughts after visualising dataset:
-    There doesn't seem to be any obvious trend in the data (at least linearly)
-    except for in the "proportion of drivers" vs petrol usage graph. I predict
-    that the weight for the proportion of drivers feature will be larger relative
-    to the other features.
-"""
 
 def predict(X, w, b):
     """
@@ -134,6 +83,69 @@ def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, 
 
     return w, b, cost_history
 
+def zscore_normalize_features(X):
+    """
+    normalizes the features X through zscore normalization by column
+    """
+
+    means = np.mean(X, axis=0)  # find the mean of each column/feature
+    sigma = np.std(X, axis=0)   # standard deviation of each col/feature
+    X_norm = (X - means)/sigma
+
+    return X_norm, means, sigma
+
+"""
+Data Parsing/cleaning 
+"""
+data = np.loadtxt("./Data/petrol_usage.txt", skiprows=41) # load data
+data = np.delete(data, 0, 1)    # delete first col (index)
+labels = ['petrol tax', 'per capita income', 'miles of paved driveway', 'proportion of drivers']
+
+# break data into features and outcomes
+X = np.delete(data, 4, 1)
+X, means, sigma = zscore_normalize_features(X)
+# np.s_[0:4] means 0 up to 4 cols get deleted, the 1 = col, 0 = row
+Y = np.delete(data, np.s_[0:4], 1)
+# flatten to make it go from a 2d array with a bunch of 1 entry arrays
+# to a 1d array with the same # of entries 
+Y = Y.flatten()
+# print(f"X Shape: {X.shape}, X Type:{type(X)})")
+# print(f"y Shape: {Y.shape}, y Type:{type(Y)})")
+print(X)
+print(Y)
+
+"""
+Data Plotting/Visualization
+"""
+# fig, ax = plt.subplots(1,4,figsize=(12,5),sharey=True)
+# for i in range(len(ax)):
+#     # [: x,y] syntax = row , column
+#     ax[i].scatter(X[:,i], Y, c="blue")
+#     ax[i].set_xlabel(labels[i])
+# ax[0].set_ylabel("petrol used")
+# plt.show()
+
+"""
+test data creation
+"""
+# X_train = np.array([[2104, 5, 1, 45], [1416, 3, 2, 40], [852, 2, 1, 35]])
+# y_train = np.array([460, 232, 178])
+# print(f"X Shape: {X_train.shape}, X Type:{type(X_train)})")
+# print(X_train)
+# print(f"y Shape: {y_train.shape}, y Type:{type(y_train)})")
+# print(y_train)
+# b_init = 785.1811367994083
+# w_init = np.array([ 0.39133535, 18.75376741, -53.36032453, -26.42131618])
+# print(f"w_init shape: {w_init.shape}, b_init type: {type(b_init)}")
+
+
+"""
+Thoughts after visualising dataset:
+    There doesn't seem to be any obvious trend in the data (at least linearly)
+    except for in the "proportion of drivers" vs petrol usage graph. I predict
+    that the weight for the proportion of drivers feature will be larger relative
+    to the other features.
+"""
 
 # """ predict() test """
 # # get a row from our training data
@@ -170,7 +182,7 @@ def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, 
 input_w = np.zeros(X.shape[1])
 input_b = 0
 iter = 10000
-alpha = 5.0e-9
+alpha = 5.0e-2
 # initial alpyha of 5.0e-7 was too large and leading to infinite cost, 
 w_predict, b_predict, history = gradient_descent(X, Y, input_w, input_b, compute_cost, compute_gradient, alpha, iter)
 
@@ -189,4 +201,16 @@ Notes after implementing regression without feature scaling or regularization:
     of the features that were produced through gradient descent were not what I predicted, and seem
     to emphasize the 2nd input rather than the 4th like I predicted. Hopefully implementing feature
     scaling and regularization will fix this.
+    weights = [0.00342409 0.12526768 0.00576827 0.00058011]
+"""
+
+"""
+Notes on implementing feature scaling after regular linear regression:
+    After successfully normalizing each feature, no longer got valid results. Fixed by increasing learning
+    rate/alpha by 10^7, resulting in better predictions and weights that are closer to prediction
+    weights = [-32.7310515  -37.79691223  -8.3813148   73.3569154 ]
+
+    while there is probably room for improvement through regularization, the weights now heavily emphasize
+    the 4th feature (proportion of drivers) like initial prediction
+
 """
