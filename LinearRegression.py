@@ -9,22 +9,30 @@ def predict(X, w, b):
     """
     return np.dot(X, w) + b
 
-def compute_cost(X, y, w, b):
+def compute_cost(X, y, w, b, lambda_=0):
     """
     calculates the cost of a predictive model with weights w and bias b
     cost function used: (first image) https://math.stackexchange.com/questions/2202545/why-using-squared-distances-in-the-cost-function-linear-regression
     """
 
-    m = X.shape[0] # get the # of data points
+    m,n = X.shape # get the # of data points
     totalCost = 0
 
     for i in range (m):
         f_wb_i = np.dot(X[i], w) + b
         totalCost += (f_wb_i - y[i])**2
     totalCost /= 2*m
+
+    # extra cost for regularization, does nothing is lambda is 0 (no regulariation)
+    regularizationCost = 0;
+    for i in range(n):
+        regularizationCost += (w[i])**2
+    regularizationCost *= (lambda_/(2*m));
+    
+    totalCost += regularizationCost
     return totalCost
 
-def compute_gradient(X, y, w, b):
+def compute_gradient(X, y, w, b, lambda_ = 0):
     """
     computes and returns the gradient for one step of gradient descent
     gradient function used: https://stackoverflow.com/questions/33847827/gradient-descent-for-more-than-2-theta-values 
@@ -42,9 +50,13 @@ def compute_gradient(X, y, w, b):
     dj_dw /= m
     dj_db /= m
 
+    # regularization, if lambda default (0) then this has no effect
+    for i in range(n):
+        dj_dw[i] += (lambda_/m) * w[i]
+
     return dj_dw, dj_db
 
-def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, num_iters):
+def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, num_iters, lambda_=0):
     """
     performs batch gradient descent: performs num_iters # of gradient measurements and adjusts
     weights w and bias b accordingly with learning rate alpha
@@ -71,12 +83,12 @@ def gradient_descent(X, y, w_in, b_in, cost_function, gradient_function, alpha, 
     for i in range(num_iters):
         # if(num_iters % 10 == 0):
             # print(w)
-        dj_dw, dj_db = gradient_function(X, y, w, b)
+        dj_dw, dj_db = gradient_function(X, y, w, b, lambda_)
         w -= alpha * dj_dw
         b -= alpha * dj_db
 
         if i < 100000:
-            cost_history.append(cost_function(X, y, w, b))
+            cost_history.append(cost_function(X, y, w, b, lambda_))
 
         if i % math.ceil(num_iters / 10) == 0:
             print(f"Iteration {i:4d}: Cost {cost_history[-1]:8.2f}   ")
@@ -111,8 +123,8 @@ Y = np.delete(data, np.s_[0:4], 1)
 Y = Y.flatten()
 # print(f"X Shape: {X.shape}, X Type:{type(X)})")
 # print(f"y Shape: {Y.shape}, y Type:{type(Y)})")
-print(X)
-print(Y)
+# print(X)
+# print(Y)
 
 """
 Data Plotting/Visualization
@@ -184,7 +196,7 @@ input_b = 0
 iter = 10000
 alpha = 5.0e-2
 # initial alpyha of 5.0e-7 was too large and leading to infinite cost, 
-w_predict, b_predict, history = gradient_descent(X, Y, input_w, input_b, compute_cost, compute_gradient, alpha, iter)
+w_predict, b_predict, history = gradient_descent(X, Y, input_w, input_b, compute_cost, compute_gradient, alpha, iter, lambda_=3)
 
 print(w_predict)
 for i in range(X.shape[0]):
@@ -202,6 +214,7 @@ Notes after implementing regression without feature scaling or regularization:
     to emphasize the 2nd input rather than the 4th like I predicted. Hopefully implementing feature
     scaling and regularization will fix this.
     weights = [0.00342409 0.12526768 0.00576827 0.00058011]
+    cost = 10900
 """
 
 """
@@ -209,8 +222,19 @@ Notes on implementing feature scaling after regular linear regression:
     After successfully normalizing each feature, no longer got valid results. Fixed by increasing learning
     rate/alpha by 10^7, resulting in better predictions and weights that are closer to prediction
     weights = [-32.7310515  -37.79691223  -8.3813148   73.3569154 ]
+    cost = 1969
 
     while there is probably room for improvement through regularization, the weights now heavily emphasize
     the 4th feature (proportion of drivers) like initial prediction
+"""
 
 """
+Notes on implementing regularization:
+    Overall, no obvious improvements from implementing regularization. as lambda went up the cost went up, which
+    is to be expected because its usage is to generalize the algorithm.
+    weights (lambda = 1) = [-32.41868846 -36.79987493  -8.19691574  71.80614686]
+    cost = 2050
+    weights (lambda = 3) = [-31.76500298 -34.95554814  -7.81564339  68.91779409]
+    cost = 2203
+"""
+
