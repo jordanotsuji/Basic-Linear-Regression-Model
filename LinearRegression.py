@@ -196,7 +196,7 @@ input_b = 0
 iter = 10000
 alpha = 5.0e-2
 # initial alpyha of 5.0e-7 was too large and leading to infinite cost, 
-w_predict, b_predict, history = gradient_descent(X, Y, input_w, input_b, compute_cost, compute_gradient, alpha, iter, lambda_=3)
+w_predict, b_predict, history = gradient_descent(X, Y, input_w, input_b, compute_cost, compute_gradient, alpha, iter, lambda_=1)
 
 print(w_predict)
 for i in range(X.shape[0]):
@@ -236,5 +236,8 @@ Notes on implementing regularization:
     cost = 2050
     weights (lambda = 3) = [-31.76500298 -34.95554814  -7.81564339  68.91779409]
     cost = 2203
+
+    cost will likely go down when combining regularization with polynomial regression, but for this specific
+    dataset, I dont believe that it will change much
 """
 
